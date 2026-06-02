@@ -12,10 +12,10 @@ Tested on **Moodle 5.1**. Requires **PHP 8.1+** with the **GMP extension**.
 Browser                                    Moodle (PHP)
   │                                            │
   │  1. Click "Log in with Nostr"              │
-  │─────────────────────────────────────────-─>│
+  │───────────────────────────────────────────>│
   │                                            │
   │  2. GET /auth/nostr/login.php?action=challenge
-  │<──────────────────────────────────────────-│
+  │<───────────────────────────────────────────│
   │     { nonce: "abc123…", url: "https://…" } │
   │                                            │
   │  3. window.nostr.getPublicKey()            │
@@ -35,7 +35,7 @@ Browser                                    Moodle (PHP)
   │                                            │
   │  6. POST /auth/nostr/login.php             │
   │     { event: signedEvent, metadata }       │
-  │────────────────────────────────────────-──>│
+  │───────────────────────────────────────────>│
   │                                            │  Validate:
   │                                            │  ✓ kind == 27235
   │                                            │  ✓ |now - created_at| ≤ 60s
@@ -48,7 +48,7 @@ Browser                                    Moodle (PHP)
   │                                            │  firstname = kind-0 display_name
   │                                            │
   │  7. { redirect: "/dashboard" }             │
-  │<────────────────────────────────────────-──│
+  │<───────────────────────────────────────────│
   │                                            │
   │  8. window.location.href = redirect        │
   │     (Moodle session active)                │
