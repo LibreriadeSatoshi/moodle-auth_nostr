@@ -208,7 +208,7 @@ auth/nostr/
 ```bash
 # Clone alongside Moodle
 cd /path/to/moodle
-git clone https://github.com/your-org/moodle-nostr-login auth/nostr
+git clone https://github.com/LibreriadeSatoshi/moodle-nostr-login auth/nostr
 
 # Run Moodle upgrade
 php admin/cli/upgrade.php --non-interactive
@@ -298,7 +298,11 @@ NIP-46 requires a persistent WebSocket connection with the bunker. Suggested app
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+GNU GPL v3 or later — see [LICENSE](LICENSE).
+
+All files that implement the interface between Moodle core and this plugin are
+licensed under the GNU General Public License v3, as required for plugins in the
+[Moodle plugins directory](https://moodle.org/plugins/).
 
 ---
 

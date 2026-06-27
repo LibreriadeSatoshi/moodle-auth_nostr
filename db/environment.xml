@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COMPONENTS>
+    <PLUGIN name="auth_nostr">
+        <PHP_EXTENSIONS>
+            <PHP_EXTENSION name="gmp" level="required">
+                <FEEDBACK>
+                    <ON_CHECK message="gmprequired" />
+                </FEEDBACK>
+            </PHP_EXTENSION>
+        </PHP_EXTENSIONS>
+    </PLUGIN>
+</COMPONENTS>
