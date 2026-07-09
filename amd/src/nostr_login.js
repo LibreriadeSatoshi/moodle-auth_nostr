@@ -28,6 +28,10 @@ define(['core/str'], function(Str) {
     // Language strings, populated by loadStrings() before the UI is built.
     var STR = {};
 
+    // Whether to display the step-by-step progress log. Set from init().
+    // Errors are always shown regardless of this flag.
+    var showLog = true;
+
     var STRING_KEYS = [
         'login_with_nostr', 'or',
         'status_looking', 'status_pubkey', 'status_profile', 'status_challenge',
@@ -105,6 +109,10 @@ define(['core/str'], function(Str) {
     };
 
     var setStatus = function(el, msg, isError) {
+        // Progress messages are suppressed when the log is disabled; errors always show.
+        if (!showLog && !isError) {
+            return;
+        }
         el.textContent = msg;
         el.className = 'auth-nostr-status' + (isError ? ' auth-nostr-error' : '');
     };
@@ -199,7 +207,9 @@ define(['core/str'], function(Str) {
     };
 
     return {
-        init: function(loginUrl, relay) {
+        init: function(loginUrl, relay, showlog) {
+            showLog = (showlog !== false);
+
             var ready = function(fn) {
                 if (document.readyState !== 'loading') {
                     fn();

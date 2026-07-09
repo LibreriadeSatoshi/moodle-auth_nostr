@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Admin settings for the Nostr authentication plugin.
+ * Nostr authentication plugin class.
  *
  * @package    auth_nostr
  * @copyright  2026 Librería de Satoshi
@@ -24,19 +24,62 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if ($ADMIN->fulltree) {
-    $settings->add(new admin_setting_configtext(
-        'auth_nostr/relay',
-        get_string('relay', 'auth_nostr'),
-        get_string('relay_desc', 'auth_nostr'),
-        'wss://relay.damus.io',
-        PARAM_RAW_TRIMMED
-    ));
+require_once($CFG->libdir . '/authlib.php');
 
-    $settings->add(new admin_setting_configcheckbox(
-        'auth_nostr/autocreate',
-        get_string('autocreate', 'auth_nostr'),
-        get_string('autocreate_desc', 'auth_nostr'),
-        1
-    ));
+class auth_plugin_nostr extends auth_plugin_base {
+
+    public function __construct() {
+        $this->authtype = 'nostr';
+        $this->config   = get_config('auth_nostr');
+    }
+
+    /**
+     * Nostr users authenticate via a custom challenge-response endpoint,
+     * not username + password.
+     */
+    public function user_login($username, $password) {
+        return false;
+    }
+
+    public function is_internal() {
+        return false;
+    }
+
+    public function prevent_local_passwords() {
+        return true;
+    }
+
+    public function can_signup() {
+        return false;
+    }
+
+    /**
+     * Inject the "Log in with Nostr" button on the standard login page.
+     */
+    public function loginpage_hook() {
+        global $PAGE;
+
+        $loginurl = (new moodle_url('/auth/nostr/login.php'))->out(false);
+        $relay    = get_config('auth_nostr', 'relay') ?: 'wss://relay.damus.io';
+        $showlog  = get_config('auth_nostr', 'showlog');
+        $showlog  = ($showlog === false) ? true : (bool) $showlog;
+
+        $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay, $showlog]);
+    }
+
+    public function get_userinfo($username) {
+        global $DB;
+
+        $user = $DB->get_record('user', ['username' => $username, 'auth' => 'nostr'], '*', IGNORE_MISSING);
+        if (!$user) {
+            return false;
+        }
+
+        return [
+            'username'  => $user->username,
+            'email'     => $user->email,
+            'firstname' => $user->firstname,
+            'lastname'  => $user->lastname,
+        ];
+    }
 }

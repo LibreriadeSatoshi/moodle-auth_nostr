@@ -1,0 +1,21 @@
+/* Nostr authentication plugin styles. Auto-loaded by Moodle. */
+
+/* Brand-coloured "Log in with Nostr" button (overrides Bootstrap btn-secondary). */
+#auth-nostr-btn.btn {
+    background-color: #8e30eb;
+    border-color: #8e30eb;
+    color: #fff;
+}
+
+#auth-nostr-btn.btn:hover,
+#auth-nostr-btn.btn:focus,
+#auth-nostr-btn.btn:active {
+    background-color: #7827c4;
+    border-color: #7827c4;
+    color: #fff;
+}
+
+/* Login progress "log" line: smaller than the surrounding form text. */
+#auth-nostr-status {
+    font-size: 0.75rem;
+}

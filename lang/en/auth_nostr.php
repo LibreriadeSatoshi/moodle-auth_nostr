@@ -49,6 +49,8 @@ $string['relay']                   = 'Nostr relay';
 $string['relay_desc']              = 'WebSocket relay URL used to fetch Nostr profile metadata (kind 0). Used only to populate the display name on first login.';
 $string['autocreate']              = 'Auto-create accounts';
 $string['autocreate_desc']         = 'Automatically create a Moodle account for any valid Nostr public key on first login.';
+$string['showlog']                 = 'Show login progress log';
+$string['showlog_desc']            = 'Show the step-by-step status messages (looking for extension, signing, verifying…) below the Nostr button during login. Error messages are always shown regardless of this setting.';
 
 $string['privacy:metadata']        = 'The Nostr authentication plugin does not store any personal data beyond what Moodle core stores in the standard user account.';
 

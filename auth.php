@@ -61,8 +61,10 @@ class auth_plugin_nostr extends auth_plugin_base {
 
         $loginurl = (new moodle_url('/auth/nostr/login.php'))->out(false);
         $relay    = get_config('auth_nostr', 'relay') ?: 'wss://relay.damus.io';
+        $showlog  = get_config('auth_nostr', 'showlog');
+        $showlog  = ($showlog === false) ? true : (bool) $showlog;
 
-        $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay]);
+        $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay, $showlog]);
     }
 
     public function get_userinfo($username) {
