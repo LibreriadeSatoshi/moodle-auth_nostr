@@ -33,6 +33,12 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_auth_nostr_install() {
     global $DB, $CFG;
 
+    // Persist the default for the progress-log setting so the admin checkbox
+    // and the runtime behaviour agree from the very first install.
+    if (get_config('auth_nostr', 'showlog') === false) {
+        set_config('showlog', 1, 'auth_nostr');
+    }
+
     // Only create the field if it does not already exist.
     if ($DB->record_exists('user_info_field', ['shortname' => 'nostrpubkey'])) {
         return;

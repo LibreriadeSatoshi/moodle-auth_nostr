@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Version metadata for the Nostr authentication plugin.
+ * Upgrade steps for the Nostr authentication plugin.
  *
  * @package    auth_nostr
  * @copyright  2026 Librería de Satoshi
@@ -24,8 +24,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026070901;
-$plugin->requires  = 2025041400; // Moodle 5.1
-$plugin->component = 'auth_nostr';
-$plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.1.3';
+/**
+ * @param int $oldversion the version we are upgrading from.
+ * @return bool
+ */
+function xmldb_auth_nostr_upgrade($oldversion) {
+    if ($oldversion < 2026070901) {
+        // The showlog setting was added later; persist its default for
+        // existing installs so the admin checkbox matches the actual
+        // behaviour (progress log shown by default).
+        if (get_config('auth_nostr', 'showlog') === false) {
+            set_config('showlog', 1, 'auth_nostr');
+        }
+        upgrade_plugin_savepoint(true, 2026070901, 'auth', 'nostr');
+    }
+
+    return true;
+}
