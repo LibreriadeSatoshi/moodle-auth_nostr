@@ -29,6 +29,7 @@ $string['auth_nostrname']          = 'Nostr';
 $string['auth_nostrdescription']   = 'Authenticate using a Nostr keypair via a browser extension (NIP-07).';
 
 $string['login_with_nostr']        = 'Log in with Nostr';
+$string['provider_name']        = 'Nostr';
 $string['or']                      = 'or';
 $string['status_looking']          = 'Looking for Nostr extension…';
 $string['status_pubkey']           = 'Requesting public key…';

@@ -33,7 +33,7 @@ define(['core/str'], function(Str) {
     var showLog = true;
 
     var STRING_KEYS = [
-        'login_with_nostr', 'or',
+        'login_with_nostr', 'provider_name', 'or',
         'status_looking', 'status_pubkey', 'status_profile', 'status_challenge',
         'status_signing', 'status_verifying', 'status_success',
         'error_no_extension', 'error_extension_denied', 'error_signing_cancelled',
@@ -240,8 +240,16 @@ define(['core/str'], function(Str) {
                     var btn = document.createElement('button');
                     btn.type = 'button';
                     btn.id = 'auth-nostr-btn';
-                    btn.className = 'btn btn-secondary w-100';
-                    btn.textContent = '⚡ ' + STR.login_with_nostr;
+                    // Same markup as Moodle core's identity provider buttons: the icon, then the name.
+                    btn.className = 'btn login-identityprovider-btn w-100';
+                    var icon = document.createElement('img');
+                    icon.src = M.util.image_url('nostr', 'auth_nostr');
+                    icon.alt = '';
+                    icon.width = 24;
+                    icon.height = 24;
+                    btn.appendChild(icon);
+                    btn.appendChild(document.createTextNode(' ' + STR.provider_name));
+                    btn.title = STR.login_with_nostr;
 
                     var statusEl = document.createElement('div');
                     statusEl.id = 'auth-nostr-status';
