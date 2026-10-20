@@ -29,6 +29,7 @@ $string['auth_nostrname']          = 'Nostr';
 $string['auth_nostrdescription']   = 'Autentícate usando un par de claves de Nostr mediante una extensión del navegador (NIP-07).';
 
 $string['login_with_nostr']        = 'Iniciar sesión con Nostr';
+$string['provider_name']        = 'Nostr';
 $string['or']                      = 'o';
 $string['status_looking']          = 'Buscando la extensión de Nostr…';
 $string['status_pubkey']           = 'Solicitando la clave pública…';

@@ -172,6 +172,8 @@ auth/nostr/
 ├── auth.php                      # Auth plugin class — injects login button
 ├── login.php                     # Challenge (GET) + verify (POST) endpoint
 ├── settings.php                  # Admin settings page
+├── pix/
+│   └── nostr.svg                 # Official Nostr icon (CC0 1.0), shown on the login button
 ├── lang/
 │   └── en/
 │       └── auth_nostr.php        # English strings
@@ -314,3 +316,10 @@ When submitting a PR:
 - Run `php -l` on all PHP files.
 - Test with at least one NIP-07 extension (Alby recommended).
 - If you change `schnorr.php`, add a test vector from the BIP340 spec.
+
+---
+
+## Credits
+
+`pix/nostr.svg` is the official Nostr icon from [mbarulli/nostr-logo](https://github.com/mbarulli/nostr-logo)
+(white on purple version), released under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
