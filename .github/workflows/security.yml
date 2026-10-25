@@ -1,0 +1,58 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  gitleaks:
+    name: Gitleaks (secretos en historial del PR)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # historial completo para escanear todos los commits del PR
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semgrep:
+    name: Semgrep (PHP SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install semgrep
+        run: pip install semgrep
+      # TODO(fase-1): cuando el repo central de pentesting tenga listas las
+      # reglas custom (pentesting/semgrep-rules/), copiarlas a ./semgrep-rules/
+      # en este repo y añadir `--config ./semgrep-rules/` al comando de abajo.
+      - name: Semgrep scan
+        run: semgrep scan --config p/php --config p/security-audit --error .
+
+  pytest-security:
+    name: pytest tests/test_security.py (Moodle en vivo)
+    # tests/test_security.py hace peticiones HTTP a una instancia Moodle real
+    # (MOODLE_URL, por defecto http://localhost:8888), así que NO puede correr
+    # en PRs/push. Solo manual: Actions -> Security -> Run workflow, con la
+    # variable de repo MOODLE_URL apuntando a una instancia accesible desde
+    # el runner (o un runner self-hosted junto al Moodle de laboratorio).
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test deps
+        run: pip install -r tests/requirements.txt
+      - name: Run security tests
+        env:
+          MOODLE_URL: ${{ vars.MOODLE_URL }}
+        run: pytest tests/test_security.py -v
