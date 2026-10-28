@@ -110,8 +110,15 @@ Browser                                    Moodle (PHP)
 
 ### Option B — Zip upload
 
-Zip the contents of this repository and upload via
-**Site administration → Plugins → Install plugins**.
+Download `auth_nostr-vX.Y.Z.zip` from the
+[latest release](https://github.com/LibreriadeSatoshi/moodle-auth_nostr/releases/latest)
+and upload it via **Site administration → Plugins → Install plugins**.
+
+To build the zip yourself from a tag (the plugin folder must be `nostr/`;
+`.gitattributes` leaves out tests and CI files):
+```
+git archive --format=zip --prefix=nostr/ -o auth_nostr-vX.Y.Z.zip vX.Y.Z
+```
 
 ### PHP GMP extension
 
