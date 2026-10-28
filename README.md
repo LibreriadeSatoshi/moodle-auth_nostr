@@ -168,8 +168,15 @@ The install hook creates a custom profile field **"Nostr Public Key (npub)"** (`
 |---|---|---|
 | Relay | `wss://relay.damus.io` | WebSocket relay for fetching kind-0 profile metadata on first login |
 | Auto-create accounts | Enabled | Create a Moodle account for any valid Nostr key |
+| Challenge rate limit | `10` | Max `GET ?action=challenge` per minute and client IP (excess → HTTP 429). `0` disables |
+| Verify rate limit | `20` | Max signed-event verifications per minute and client IP (excess → HTTP 429). `0` disables |
+
+### Rate limiting notes
+
+The rate limiter is a fixed-window per-IP counter backed by the plugin's `ratelimit` cache (`db/caches.php`). With Moodle's **default file cache store** the counters are shared by all PHP processes of a **single server**, but they are **not shared across multiple frontends** — on a multi-node deployment, map the `auth_nostr/ratelimit` cache definition to a shared store (Redis, memcached) under *Site administration → Plugins → Caching → Configuration*, or enforce the limit at the WAF/reverse proxy instead. The counter updates are not atomic, so under heavy concurrency a few requests over the limit may slip through — this is a DoS brake, not a precise quota.
 
 ---
+
 
 ## File structure
 
