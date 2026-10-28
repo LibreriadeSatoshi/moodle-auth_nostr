@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install semgrep
-        run: pip install --only-binary :all: semgrep==1.182.1
+        run: pip install --only-binary ":all:" semgrep==1.182.1
       # TODO(fase-1): cuando el repo central de pentesting tenga listas las
       # reglas custom (pentesting/semgrep-rules/), copiarlas a ./semgrep-rules/
       # en este repo y añadir `--config ./semgrep-rules/` al comando de abajo.
@@ -63,7 +63,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test deps
-        run: pip install --only-binary :all: -r tests/requirements.txt
+        run: pip install --only-binary ":all:" -r tests/requirements.txt
       - name: Run security tests
         env:
           MOODLE_URL: ${{ vars.MOODLE_URL }}
