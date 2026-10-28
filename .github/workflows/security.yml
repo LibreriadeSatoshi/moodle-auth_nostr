@@ -26,7 +26,7 @@ jobs:
       - name: Install gitleaks
         run: |
           tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -sSfL -o "$tarball" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${tarball}"
+          curl -sSfL --proto '=https' --tlsv1.2 -o "$tarball" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${tarball}"
           echo "${GITLEAKS_SHA256}  ${tarball}" | sha256sum -c -
           tar -xzf "$tarball" gitleaks
       - name: Gitleaks scan
@@ -63,7 +63,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install test deps
-        run: pip install --only-binary ":all:" -r tests/requirements.txt
+        # requirements.lock: generado con
+        # pip-compile --generate-hashes --allow-unsafe --strip-extras --no-emit-index-url -o requirements.lock requirements.txt
+        run: pip install --only-binary ":all:" --require-hashes -r tests/requirements.lock
       - name: Run security tests
         env:
           MOODLE_URL: ${{ vars.MOODLE_URL }}
