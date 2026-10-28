@@ -87,8 +87,14 @@ if (empty($SESSION->auth_nostr_nonce) || empty($SESSION->auth_nostr_nonce_time))
     exit;
 }
 
-if ((time() - (int) $SESSION->auth_nostr_nonce_time) > 120) {
-    unset($SESSION->auth_nostr_nonce, $SESSION->auth_nostr_nonce_time);
+// N-05: consume the nonce immediately (single use), before any further
+// validation. Any failed attempt below invalidates the challenge, so two
+// concurrent requests can never both pass the challenge check.
+$nonce      = $SESSION->auth_nostr_nonce;
+$noncetime  = (int) $SESSION->auth_nostr_nonce_time;
+unset($SESSION->auth_nostr_nonce, $SESSION->auth_nostr_nonce_time);
+
+if ((time() - $noncetime) > 120) {
     http_response_code(400);
     echo json_encode(['error' => 'Challenge expired — reload the page and try again']);
     exit;
@@ -108,15 +114,17 @@ if (!isset($event['created_at']) || abs(time() - (int) $event['created_at']) > 6
 }
 
 $challenge_tag = nostr_event::get_tag($event, 'challenge');
-if ($challenge_tag !== $SESSION->auth_nostr_nonce) {
+if ($challenge_tag !== $nonce) {
     http_response_code(400);
     echo json_encode(['error' => 'Challenge mismatch']);
     exit;
 }
 
-$url_tag   = nostr_event::get_tag($event, 'u');
-$login_url = (new moodle_url('/auth/nostr/login.php'))->out(false);
-if (!$url_tag || parse_url($url_tag, PHP_URL_PATH) !== parse_url($login_url, PHP_URL_PATH)) {
+// N-04: the NIP-98 `u` tag must be the exact absolute URL of this endpoint
+// (scheme + host + path derived from $CFG->wwwroot), not just the path.
+$url_tag = nostr_event::get_tag($event, 'u');
+$expected_url = (new moodle_url('/auth/nostr/login.php'))->out(false);
+if ($url_tag !== $expected_url) {
     http_response_code(400);
     echo json_encode(['error' => 'URL tag does not match']);
     exit;
@@ -144,21 +152,44 @@ if (!$sig_valid) {
     exit;
 }
 
-// Signature verified — consume the nonce so it cannot be reused.
-unset($SESSION->auth_nostr_nonce, $SESSION->auth_nostr_nonce_time);
-
 // ── Find or create the Moodle user ────────────────────────────────────────────
 $pubkey_hex = $event['pubkey'];
 $npub       = nostr_event::pubkey_to_npub($pubkey_hex);
 $username   = $npub;
 
+// N-02: only ever adopt accounts owned by this plugin. An account with the
+// same username created via another auth method (manual, email, webservice)
+// must never be logged into through this endpoint.
 $user = $DB->get_record('user', [
     'username'   => $username,
+    'auth'       => 'nostr',
     'mnethostid' => $CFG->mnet_localhost_id,
     'deleted'    => 0,
 ]);
 
+// N-01: a suspended account must not log in. Use the same generic message as
+// any other rejection below so the endpoint is not an account-status oracle.
+if ($user && $user->suspended) {
+    http_response_code(403);
+    echo json_encode(['error' => get_string('error_login_failed', 'auth_nostr')]);
+    exit;
+}
+
 if (!$user) {
+    // N-02: the username (= npub) is taken by a non-nostr account. Reject with
+    // the same generic message instead of adopting the foreign account or
+    // silently creating a differently-named one (decision: an admin must
+    // resolve the collision manually, e.g. by renaming the squatted account).
+    $collision = $DB->get_record('user', [
+        'username'   => $username,
+        'mnethostid' => $CFG->mnet_localhost_id,
+        'deleted'    => 0,
+    ]);
+    if ($collision) {
+        http_response_code(403);
+        echo json_encode(['error' => get_string('error_login_failed', 'auth_nostr')]);
+        exit;
+    }
     if (!get_config('auth_nostr', 'autocreate')) {
         http_response_code(403);
         echo json_encode(['error' => 'Account auto-creation is disabled on this site']);
