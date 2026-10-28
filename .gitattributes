@@ -1,0 +1,6 @@
+# Excluded from `git archive`, used to build the release zip (nostr/ prefix)
+# that admins upload via Site administration > Plugins > Install plugins.
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.github export-ignore
+/tests export-ignore
