@@ -55,7 +55,7 @@ class rate_limiter {
 
         $cache = \cache::make('auth_nostr', 'ratelimit');
         $ip    = getremoteaddr();
-        $key   = $bucket . '_' . md5($ip === false ? 'unknown' : $ip);
+        $key   = $bucket . '_' . hash('sha256', $ip === false ? 'unknown' : $ip);
         $now   = time();
 
         $entry = $cache->get($key);
