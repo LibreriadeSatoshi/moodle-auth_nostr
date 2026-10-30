@@ -74,9 +74,35 @@ define(['core/str'], function(Str) {
     // Resolves with the parsed content object, or null on timeout/error.
     var fetchKind0 = function(relay, pubkey, timeout) {
         return new Promise(function(resolve) {
-            var timer = setTimeout(function() { resolve(null); }, timeout);
+            var ws = null;
+            var timer = null;
+            var settled = false;
+            // Idempotent settle: clear the timer, detach every handler, close
+            // the socket and resolve exactly once — so timeout, malformed
+            // messages, errors and normal closes never leave an open relay
+            // connection (and its callbacks) lingering in the page.
+            var settle = function(value) {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                clearTimeout(timer);
+                if (ws) {
+                    ws.onopen = null;
+                    ws.onmessage = null;
+                    ws.onerror = null;
+                    ws.onclose = null;
+                    try {
+                        ws.close();
+                    } catch (_) {
+                        // Ignore: socket was already closing/closed.
+                    }
+                }
+                resolve(value);
+            };
+            timer = setTimeout(function() { settle(null); }, timeout);
             try {
-                var ws = new WebSocket(relay);
+                ws = new WebSocket(relay);
                 ws.onopen = function() {
                     ws.send(JSON.stringify([
                         'REQ', 'auth-meta',
@@ -87,23 +113,18 @@ define(['core/str'], function(Str) {
                     try {
                         var msg = JSON.parse(e.data);
                         if (msg[0] === 'EVENT' && msg[2] && msg[2].kind === 0) {
-                            clearTimeout(timer);
-                            ws.close();
-                            resolve(JSON.parse(msg[2].content));
+                            settle(JSON.parse(msg[2].content));
                         } else if (msg[0] === 'EOSE') {
-                            clearTimeout(timer);
-                            ws.close();
-                            resolve(null);
+                            settle(null);
                         }
                     } catch (_) {
-                        clearTimeout(timer);
-                        resolve(null);
+                        settle(null);
                     }
                 };
-                ws.onerror = function() { clearTimeout(timer); resolve(null); };
+                ws.onerror = function() { settle(null); };
+                ws.onclose = function() { settle(null); };
             } catch (_) {
-                clearTimeout(timer);
-                resolve(null);
+                settle(null);
             }
         });
     };

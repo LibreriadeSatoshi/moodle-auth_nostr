@@ -41,6 +41,16 @@ $PAGE->set_context(context_system::instance());
 // All responses from this endpoint are JSON.
 header('Content-Type: application/json; charset=utf-8');
 
+// The plugin's login-page hook only fires while the auth method is enabled,
+// but this endpoint stays directly reachable when an admin disables Nostr
+// under "Manage authentication". Enforce the enabled state here as well:
+// while disabled, issue no challenges and complete no logins.
+if (!is_enabled_auth('nostr')) {
+    http_response_code(404);
+    echo json_encode(['error' => 'Not found']);
+    exit;
+}
+
 $action = optional_param('action', '', PARAM_ALPHA);
 
 // ── GET /auth/nostr/login.php?action=challenge ────────────────────────────────
@@ -69,7 +79,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body = json_decode(file_get_contents('php://input'), true);
+// Reject oversized bodies before buffering them: a NIP-98 login payload
+// (one signed event plus optional kind-0 metadata) never needs more than a
+// few KB. Check the declared length first, then read through a bounded
+// stream so a missing/lying Content-Length cannot exhaust request memory.
+$maxbody = 16384;
+$contentlength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+if ($contentlength > $maxbody) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Request body too large']);
+    exit;
+}
+
+$rawbody = (string) file_get_contents('php://input', false, null, 0, $maxbody + 1);
+if (strlen($rawbody) > $maxbody) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Request body too large']);
+    exit;
+}
+
+$body = json_decode($rawbody, true);
 
 if (!is_array($body) || empty($body['event']) || !is_array($body['event'])) {
     http_response_code(400);
@@ -199,7 +228,11 @@ if (!$user) {
     // Derive display name from Nostr kind-0 metadata if the client provided it.
     $firstname = '';
     if (is_array($metadata)) {
-        $firstname = trim($metadata['display_name'] ?? $metadata['name'] ?? '');
+        $candidate = $metadata['display_name'] ?? $metadata['name'] ?? '';
+        if (is_string($candidate)) {
+            // Bound the client-provided name to the column size (varchar 100).
+            $firstname = trim(core_text::substr($candidate, 0, 100));
+        }
     }
     if ($firstname === '') {
         $firstname = nostr_event::pubkey_to_npub_short($pubkey_hex);
@@ -224,8 +257,11 @@ if (!$user) {
     try {
         $newuser->id = user_create_user($newuser, false, false);
     } catch (\Exception $e) {
+        // Never reflect exception messages to an unauthenticated client:
+        // generic response here, full detail only in the server-side log.
+        debugging('auth_nostr: could not create user account: ' . $e->getMessage(), DEBUG_DEVELOPER);
         http_response_code(500);
-        echo json_encode(['error' => 'Could not create user account: ' . $e->getMessage()]);
+        echo json_encode(['error' => 'Could not create user account. Please try again later.']);
         exit;
     }
 
