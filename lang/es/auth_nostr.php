@@ -52,6 +52,10 @@ $string['autocreate']              = 'Crear cuentas automáticamente';
 $string['autocreate_desc']         = 'Crea automáticamente una cuenta de Moodle para cualquier clave pública de Nostr válida en el primer inicio de sesión.';
 $string['showlog']                 = 'Mostrar el registro de progreso del inicio de sesión';
 $string['showlog_desc']            = 'Muestra los mensajes de estado paso a paso (buscando la extensión, firmando, verificando…) bajo el botón de Nostr durante el inicio de sesión. Los mensajes de error se muestran siempre, independientemente de esta opción.';
+$string['challengeratelimit']      = 'Límite de desafíos (por IP y minuto)';
+$string['challengeratelimit_desc'] = 'Número máximo de desafíos de inicio de sesión (GET ?action=challenge) servidos por minuto y por IP del cliente. Cada desafío crea una fila de sesión en Moodle, así que este freno protege contra el crecimiento descontrolado de la tabla de sesiones. Por defecto: 10. Pon 0 para desactivarlo (no recomendado). En instalaciones con varios frontales, asigna la caché auth_nostr/ratelimit a un almacén compartido (Redis, memcached) en Administración del sitio → Plugins → Caché.';
+$string['verifyratelimit']         = 'Límite de verificaciones (por IP y minuto)';
+$string['verifyratelimit_desc']    = 'Número máximo de intentos de inicio de sesión (POST con un evento firmado que llega a la verificación de firma) por minuto y por IP del cliente. Limita el coste de CPU de la verificación Schnorr en el servidor. Por defecto: 20. Pon 0 para desactivarlo (no recomendado).';
 
 $string['privacy:metadata']        = 'El plugin de autenticación con Nostr no almacena ningún dato personal más allá de lo que Moodle guarda en la cuenta de usuario estándar.';
 

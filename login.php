@@ -61,6 +61,18 @@ if ($action === 'challenge') {
         exit;
     }
 
+    // N-06: per-IP rate limit. Every challenge costs a Moodle session row
+    // (mdl_sessions); without a brake this is an unauthenticated slow-DoS.
+    // The check runs before touching $SESSION so throttled requests stay
+    // cheap and stateless.
+    $challengelimit = (int) (get_config('auth_nostr', 'challengeratelimit') ?: 10);
+    if (!\auth_nostr\rate_limiter::allow('challenge', $challengelimit)) {
+        http_response_code(429);
+        header('Retry-After: 60');
+        echo json_encode(['error' => 'Too many requests — try again in a minute']);
+        exit;
+    }
+
     $nonce = bin2hex(random_bytes(32));
     $SESSION->auth_nostr_nonce      = $nonce;
     $SESSION->auth_nostr_nonce_time = time();
@@ -167,6 +179,15 @@ if ($method_tag !== 'POST') {
 }
 
 // ── Verify cryptographic signature ───────────────────────────────────────────
+// N-06: per-IP rate limit before paying the Schnorr verification cost.
+$verifylimit = (int) (get_config('auth_nostr', 'verifyratelimit') ?: 20);
+if (!\auth_nostr\rate_limiter::allow('verify', $verifylimit)) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    echo json_encode(['error' => 'Too many requests — try again in a minute']);
+    exit;
+}
+
 try {
     $sig_valid = nostr_event::verify($event);
 } catch (\RuntimeException $e) {

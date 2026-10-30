@@ -46,4 +46,20 @@ if ($ADMIN->fulltree) {
         get_string('showlog_desc', 'auth_nostr'),
         1
     ));
+
+    $settings->add(new admin_setting_configtext(
+        'auth_nostr/challengeratelimit',
+        get_string('challengeratelimit', 'auth_nostr'),
+        get_string('challengeratelimit_desc', 'auth_nostr'),
+        10,
+        PARAM_INT
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'auth_nostr/verifyratelimit',
+        get_string('verifyratelimit', 'auth_nostr'),
+        get_string('verifyratelimit_desc', 'auth_nostr'),
+        20,
+        PARAM_INT
+    ));
 }

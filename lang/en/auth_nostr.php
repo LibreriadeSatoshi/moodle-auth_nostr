@@ -52,6 +52,10 @@ $string['autocreate']              = 'Auto-create accounts';
 $string['autocreate_desc']         = 'Automatically create a Moodle account for any valid Nostr public key on first login.';
 $string['showlog']                 = 'Show login progress log';
 $string['showlog_desc']            = 'Show the step-by-step status messages (looking for extension, signing, verifying…) below the Nostr button during login. Error messages are always shown regardless of this setting.';
+$string['challengeratelimit']      = 'Challenge rate limit (per IP per minute)';
+$string['challengeratelimit_desc'] = 'Maximum number of login challenges (GET ?action=challenge) served per minute and client IP. Each challenge creates a Moodle session row, so this brake protects against unauthenticated session-table bloat. Default: 10. Set to 0 to disable (not recommended). On multi-node setups, map the auth_nostr/ratelimit cache to a shared store (Redis, memcached) under Site administration → Plugins → Caching.';
+$string['verifyratelimit']         = 'Verify rate limit (per IP per minute)';
+$string['verifyratelimit_desc']    = 'Maximum number of login attempts (POST with a signed event that reaches signature verification) per minute and client IP. This caps the server-side Schnorr verification cost. Default: 20. Set to 0 to disable (not recommended).';
 
 $string['privacy:metadata']        = 'The Nostr authentication plugin does not store any personal data beyond what Moodle core stores in the standard user account.';
 
