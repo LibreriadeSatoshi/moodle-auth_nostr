@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup PHP ${{ matrix.php }}
-        uses: shivammathur/setup-php@2e947e0a0a89dc5c40648e5560a8ce5d1c5db3f4 # v2
+        uses: shivammathur/setup-php@fcafdd6392932010c2bd5094439b8e33be2a8a09 # v2
         with:
           php-version: ${{ matrix.php }}
           # gmp: required by classes/schnorr.php for signature verification.
