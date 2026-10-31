@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Nostr authentication plugin class.
+ * Nostr authentication plugin.
  *
  * @package    auth_nostr
  * @copyright  2026 Librería de Satoshi
@@ -26,8 +26,17 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/authlib.php');
 
+/**
+ * Nostr authentication plugin class.
+ *
+ * @package    auth_nostr
+ * @copyright  2026 Librería de Satoshi
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class auth_plugin_nostr extends auth_plugin_base {
-
+    /**
+     * Constructor.
+     */
     public function __construct() {
         $this->authtype = 'nostr';
         $this->config   = get_config('auth_nostr');
@@ -36,19 +45,38 @@ class auth_plugin_nostr extends auth_plugin_base {
     /**
      * Nostr users authenticate via a custom challenge-response endpoint,
      * not username + password.
+     *
+     * @param string $username Username.
+     * @param string $password Password.
+     * @return bool Always false: password login is never handled here.
      */
     public function user_login($username, $password) {
         return false;
     }
 
+    /**
+     * Whether the plugin uses Moodle's internal password authentication.
+     *
+     * @return bool Always false.
+     */
     public function is_internal() {
         return false;
     }
 
+    /**
+     * Whether local passwords should be prevented for accounts of this type.
+     *
+     * @return bool Always true: Nostr accounts have no Moodle password.
+     */
     public function prevent_local_passwords() {
         return true;
     }
 
+    /**
+     * Whether the plugin offers a signup form.
+     *
+     * @return bool Always false: accounts are created by the login endpoint.
+     */
     public function can_signup() {
         return false;
     }
@@ -67,6 +95,12 @@ class auth_plugin_nostr extends auth_plugin_base {
         $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay, $showlog]);
     }
 
+    /**
+     * Return user information for the given username.
+     *
+     * @param string $username Username (npub).
+     * @return array|bool User info array, or false when not found.
+     */
     public function get_userinfo($username) {
         global $DB;
 
