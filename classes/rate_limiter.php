@@ -35,7 +35,6 @@ namespace auth_nostr;
  * memcached) via Site administration → Plugins → Caching → Configuration.
  */
 class rate_limiter {
-
     /** @var int Default window length in seconds. */
     const WINDOW = 60;
 

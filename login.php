@@ -53,7 +53,7 @@ if (!is_enabled_auth('nostr')) {
 
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// ── GET /auth/nostr/login.php?action=challenge ────────────────────────────────
+// GET /auth/nostr/login.php?action=challenge.
 if ($action === 'challenge') {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         http_response_code(405);
@@ -84,7 +84,7 @@ if ($action === 'challenge') {
     exit;
 }
 
-// ── POST /auth/nostr/login.php ────────────────────────────────────────────────
+// POST /auth/nostr/login.php.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
@@ -121,7 +121,7 @@ if (!is_array($body) || empty($body['event']) || !is_array($body['event'])) {
 $event    = $body['event'];
 $metadata = $body['metadata'] ?? null;
 
-// ── Validate session nonce (CSRF / replay protection) ─────────────────────────
+// Validate session nonce (CSRF / replay protection).
 if (empty($SESSION->auth_nostr_nonce) || empty($SESSION->auth_nostr_nonce_time)) {
     http_response_code(400);
     echo json_encode(['error' => 'No challenge found — reload the page and try again']);
@@ -141,7 +141,7 @@ if ((time() - $noncetime) > 120) {
     exit;
 }
 
-// ── Validate event fields ─────────────────────────────────────────────────────
+// Validate event fields.
 if (!isset($event['kind']) || (int) $event['kind'] !== 27235) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid event kind (expected 27235)']);
@@ -154,8 +154,8 @@ if (!isset($event['created_at']) || abs(time() - (int) $event['created_at']) > 6
     exit;
 }
 
-$challenge_tag = nostr_event::get_tag($event, 'challenge');
-if ($challenge_tag !== $nonce) {
+$challengetag = nostr_event::get_tag($event, 'challenge');
+if ($challengetag !== $nonce) {
     http_response_code(400);
     echo json_encode(['error' => 'Challenge mismatch']);
     exit;
@@ -163,22 +163,22 @@ if ($challenge_tag !== $nonce) {
 
 // N-04: the NIP-98 `u` tag must be the exact absolute URL of this endpoint
 // (scheme + host + path derived from $CFG->wwwroot), not just the path.
-$url_tag = nostr_event::get_tag($event, 'u');
-$expected_url = (new moodle_url('/auth/nostr/login.php'))->out(false);
-if ($url_tag !== $expected_url) {
+$urltag = nostr_event::get_tag($event, 'u');
+$expectedurl = (new moodle_url('/auth/nostr/login.php'))->out(false);
+if ($urltag !== $expectedurl) {
     http_response_code(400);
     echo json_encode(['error' => 'URL tag does not match']);
     exit;
 }
 
-$method_tag = nostr_event::get_tag($event, 'method');
-if ($method_tag !== 'POST') {
+$methodtag = nostr_event::get_tag($event, 'method');
+if ($methodtag !== 'POST') {
     http_response_code(400);
     echo json_encode(['error' => 'Method tag must be POST']);
     exit;
 }
 
-// ── Verify cryptographic signature ───────────────────────────────────────────
+// Verify cryptographic signature.
 // N-06: per-IP rate limit before paying the Schnorr verification cost.
 $verifylimit = (int) (get_config('auth_nostr', 'verifyratelimit') ?: 20);
 if (!\auth_nostr\rate_limiter::allow('verify', $verifylimit)) {
@@ -189,22 +189,22 @@ if (!\auth_nostr\rate_limiter::allow('verify', $verifylimit)) {
 }
 
 try {
-    $sig_valid = nostr_event::verify($event);
+    $sigvalid = nostr_event::verify($event);
 } catch (\RuntimeException $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
     exit;
 }
 
-if (!$sig_valid) {
+if (!$sigvalid) {
     http_response_code(401);
     echo json_encode(['error' => 'Invalid signature']);
     exit;
 }
 
-// ── Find or create the Moodle user ────────────────────────────────────────────
-$pubkey_hex = $event['pubkey'];
-$npub       = nostr_event::pubkey_to_npub($pubkey_hex);
+// Find or create the Moodle user.
+$pubkeyhex = $event['pubkey'];
+$npub       = nostr_event::pubkey_to_npub($pubkeyhex);
 $username   = $npub;
 
 // N-02: only ever adopt accounts owned by this plugin. An account with the
@@ -256,7 +256,7 @@ if (!$user) {
         }
     }
     if ($firstname === '') {
-        $firstname = nostr_event::pubkey_to_npub_short($pubkey_hex);
+        $firstname = nostr_event::pubkey_to_npub_short($pubkeyhex);
     }
 
     $newuser               = new stdClass();
@@ -273,7 +273,7 @@ if (!$user) {
     $newuser->timemodified = time();
 
     // Store the full hex pubkey as idnumber for future lookups / account linking.
-    $newuser->idnumber = $pubkey_hex;
+    $newuser->idnumber = $pubkeyhex;
 
     try {
         $newuser->id = user_create_user($newuser, false, false);
@@ -290,7 +290,7 @@ if (!$user) {
     require_once($CFG->dirroot . '/user/profile/lib.php');
     profile_save_data((object)[
         'id'                          => $newuser->id,
-        'profile_field_nostrpubkey'   => nostr_event::pubkey_to_npub($pubkey_hex),
+        'profile_field_nostrpubkey'   => nostr_event::pubkey_to_npub($pubkeyhex),
     ]);
 
     $user = get_complete_user_data('id', $newuser->id);
@@ -302,7 +302,7 @@ if (!$user) {
     exit;
 }
 
-// ── Complete the Moodle login ─────────────────────────────────────────────────
+// Complete the Moodle login.
 complete_user_login($user);
 
 $redirect = core_login_get_return_url();
