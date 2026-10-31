@@ -24,39 +24,34 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname']              = 'Nostr authentication';
-$string['auth_nostrname']          = 'Nostr';
 $string['auth_nostrdescription']   = 'Authenticate using a Nostr keypair via a browser extension (NIP-07).';
-
-$string['login_with_nostr']        = 'Log in with Nostr';
-$string['provider_name']        = 'Nostr';
-$string['or']                      = 'or';
-$string['status_looking']          = 'Looking for Nostr extension…';
-$string['status_pubkey']           = 'Requesting public key…';
-$string['status_profile']          = 'Fetching your Nostr profile…';
-$string['status_challenge']        = 'Requesting login challenge…';
-$string['status_signing']          = 'Signing login request…';
-$string['status_verifying']        = 'Verifying with server…';
-$string['status_success']          = 'Logged in! Redirecting…';
-
-$string['error_no_extension']      = 'No Nostr extension found. Please install Alby or nos2x.';
-$string['error_extension_denied']  = 'Extension denied access.';
-$string['error_signing_cancelled'] = 'Signing was cancelled.';
-$string['error_challenge']         = 'Failed to get login challenge. Please reload and try again.';
-$string['error_network']           = 'Network error. Please try again.';
-$string['error_login_failed']      = 'Login failed. Please try again.';
-
-$string['relay']                   = 'Nostr relay';
-$string['relay_desc']              = 'WebSocket relay URL used to fetch Nostr profile metadata (kind 0). Used only to populate the display name on first login.';
+$string['auth_nostrname']          = 'Nostr';
 $string['autocreate']              = 'Auto-create accounts';
 $string['autocreate_desc']         = 'Automatically create a Moodle account for any valid Nostr public key on first login.';
-$string['showlog']                 = 'Show login progress log';
-$string['showlog_desc']            = 'Show the step-by-step status messages (looking for extension, signing, verifying…) below the Nostr button during login. Error messages are always shown regardless of this setting.';
 $string['challengeratelimit']      = 'Challenge rate limit (per IP per minute)';
 $string['challengeratelimit_desc'] = 'Maximum number of login challenges (GET ?action=challenge) served per minute and client IP. Each challenge creates a Moodle session row, so this brake protects against unauthenticated session-table bloat. Default: 10. Set to 0 to disable (not recommended). On multi-node setups, map the auth_nostr/ratelimit cache to a shared store (Redis, memcached) under Site administration → Plugins → Caching.';
+$string['error_challenge']         = 'Failed to get login challenge. Please reload and try again.';
+$string['error_extension_denied']  = 'Extension denied access.';
+$string['error_login_failed']      = 'Login failed. Please try again.';
+$string['error_network']           = 'Network error. Please try again.';
+$string['error_no_extension']      = 'No Nostr extension found. Please install Alby or nos2x.';
+$string['error_signing_cancelled'] = 'Signing was cancelled.';
+$string['gmprequired']             = 'The GMP PHP extension is required by the Nostr authentication plugin (auth_nostr) to verify Schnorr signatures.';
+$string['login_with_nostr']        = 'Log in with Nostr';
+$string['or']                      = 'or';
+$string['pluginname']              = 'Nostr authentication';
+$string['privacy:metadata']        = 'The Nostr authentication plugin does not store any personal data beyond what Moodle core stores in the standard user account.';
+$string['provider_name']           = 'Nostr';
+$string['relay']                   = 'Nostr relay';
+$string['relay_desc']              = 'WebSocket relay URL used to fetch Nostr profile metadata (kind 0). Used only to populate the display name on first login.';
+$string['showlog']                 = 'Show login progress log';
+$string['showlog_desc']            = 'Show the step-by-step status messages (looking for extension, signing, verifying…) below the Nostr button during login. Error messages are always shown regardless of this setting.';
+$string['status_challenge']        = 'Requesting login challenge…';
+$string['status_looking']          = 'Looking for Nostr extension…';
+$string['status_profile']          = 'Fetching your Nostr profile…';
+$string['status_pubkey']           = 'Requesting public key…';
+$string['status_signing']          = 'Signing login request…';
+$string['status_success']          = 'Logged in! Redirecting…';
+$string['status_verifying']        = 'Verifying with server…';
 $string['verifyratelimit']         = 'Verify rate limit (per IP per minute)';
 $string['verifyratelimit_desc']    = 'Maximum number of login attempts (POST with a signed event that reaches signature verification) per minute and client IP. This caps the server-side Schnorr verification cost. Default: 20. Set to 0 to disable (not recommended).';
-
-$string['privacy:metadata']        = 'The Nostr authentication plugin does not store any personal data beyond what Moodle core stores in the standard user account.';
-
-$string['gmprequired']             = 'The GMP PHP extension is required by the Nostr authentication plugin (auth_nostr) to verify Schnorr signatures.';

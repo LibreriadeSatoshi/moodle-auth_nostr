@@ -81,8 +81,8 @@ class schnorr {
      *
      * Returns null to represent the point at infinity.
      *
-     * @param array{x:\GMP,y:\GMP}|null $pointp First point.
-     * @param array{x:\GMP,y:\GMP}|null $pointq Second point.
+     * @param array|null $pointp First point, as array{x: \GMP, y: \GMP}.
+     * @param array|null $pointq Second point, as array{x: \GMP, y: \GMP}.
      * @return array{x:\GMP,y:\GMP}|null
      */
     private static function point_add(?array $pointp, ?array $pointq): ?array {
@@ -120,7 +120,7 @@ class schnorr {
      * LSB-first double-and-add.
      *
      * @param \GMP $scalar Scalar to multiply by.
-     * @param array{x:\GMP,y:\GMP} $point Point to multiply.
+     * @param array $point Point to multiply, as array{x: \GMP, y: \GMP}.
      * @return array{x:\GMP,y:\GMP}|null
      */
     private static function point_mul(\GMP $scalar, array $point): ?array {
