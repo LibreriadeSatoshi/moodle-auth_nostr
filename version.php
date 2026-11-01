@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026102202;
+$plugin->version   = 2026110100;
 $plugin->requires  = 2025041400; // Moodle 5.1.
 $plugin->component = 'auth_nostr';
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.1.8';
+$plugin->release   = '0.1.9';
