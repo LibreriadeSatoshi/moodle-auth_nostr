@@ -16,8 +16,6 @@
 
 namespace auth_nostr;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Nostr event verification helpers.
  *
@@ -26,11 +24,11 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class nostr_event {
-
     /**
      * Verify a Nostr event: ID integrity + Schnorr signature.
      *
-     * @param array $event  Decoded JSON event object.
+     * @param array $event Decoded JSON event object.
+     * @return bool True when the event id and signature are valid.
      */
     public static function verify(array $event): bool {
         $required = ['id', 'pubkey', 'created_at', 'kind', 'tags', 'content', 'sig'];
@@ -51,6 +49,9 @@ class nostr_event {
     /**
      * Compute the event ID as defined by NIP-01:
      * SHA256(JSON([0, pubkey, created_at, kind, tags, content]))
+     *
+     * @param array $event Decoded JSON event object.
+     * @return string Hex-encoded event id.
      */
     public static function compute_id(array $event): string {
         $serialized = json_encode(
@@ -71,9 +72,9 @@ class nostr_event {
     /**
      * Extract the first value of a named tag from an event.
      *
-     * @param array  $event
-     * @param string $name   Tag name (first element of each tag array).
-     * @return string|null   Second element (the value), or null if not found.
+     * @param array  $event Decoded JSON event object.
+     * @param string $name  Tag name (first element of each tag array).
+     * @return string|null  Second element (the value), or null if not found.
      */
     public static function get_tag(array $event, string $name): ?string {
         foreach ($event['tags'] as $tag) {
@@ -86,6 +87,9 @@ class nostr_event {
 
     /**
      * Return a shortened npub for display: npub1xxxxxxxx…yyyy
+     *
+     * @param string $hex Hex-encoded 32-byte public key.
+     * @return string Shortened npub.
      */
     public static function pubkey_to_npub_short(string $hex): string {
         $npub = self::pubkey_to_npub($hex);
@@ -94,6 +98,9 @@ class nostr_event {
 
     /**
      * Convert a hex-encoded 32-byte public key to its npub (bech32) representation (NIP-19).
+     *
+     * @param string $hex Hex-encoded 32-byte public key.
+     * @return string Bech32-encoded npub.
      */
     public static function pubkey_to_npub(string $hex): string {
         $bytes = array_values(unpack('C*', hex2bin($hex)));
@@ -101,6 +108,12 @@ class nostr_event {
         return self::bech32_encode('npub', $data);
     }
 
+    /**
+     * Bech32 polymod checksum function (BIP-0173).
+     *
+     * @param array $values Input values.
+     * @return int Checksum value.
+     */
     private static function bech32_polymod(array $values): int {
         $generator = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
         $chk = 1;
@@ -114,6 +127,12 @@ class nostr_event {
         return $chk;
     }
 
+    /**
+     * Expand the human-readable part for checksum computation (BIP-0173).
+     *
+     * @param string $hrp Human-readable part.
+     * @return array Expanded values.
+     */
     private static function bech32_hrp_expand(string $hrp): array {
         $ret = [];
         for ($i = 0, $len = strlen($hrp); $i < $len; $i++) {
@@ -126,6 +145,13 @@ class nostr_event {
         return $ret;
     }
 
+    /**
+     * Encode data with a bech32 checksum (BIP-0173).
+     *
+     * @param string $hrp  Human-readable part.
+     * @param array  $data Data values (5-bit groups).
+     * @return string Bech32 string.
+     */
     private static function bech32_encode(string $hrp, array $data): string {
         $charset  = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
         $combined = array_merge($data, [0, 0, 0, 0, 0, 0]);
@@ -141,6 +167,15 @@ class nostr_event {
         return $result;
     }
 
+    /**
+     * Regroup bits from one base to another (BIP-0173 convertbits).
+     *
+     * @param array $data     Input values.
+     * @param int   $frombits Bits per input value.
+     * @param int   $tobits   Bits per output value.
+     * @param bool  $pad      Whether to pad the last incomplete group.
+     * @return array Output values.
+     */
     private static function bech32_convert_bits(array $data, int $frombits, int $tobits, bool $pad = true): array {
         $acc  = 0;
         $bits = 0;

@@ -16,8 +16,6 @@
 
 namespace auth_nostr\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_privacy\local\metadata\null_provider;
 
 /**
@@ -32,7 +30,11 @@ use core_privacy\local\metadata\null_provider;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements null_provider {
-
+    /**
+     * Get the language string identifier explaining why this plugin stores no data.
+     *
+     * @return string Language string identifier.
+     */
     public static function get_reason(): string {
         return 'privacy:metadata';
     }

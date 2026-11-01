@@ -100,7 +100,9 @@ define(['core/str'], function(Str) {
                 }
                 resolve(value);
             };
-            timer = setTimeout(function() { settle(null); }, timeout);
+            timer = setTimeout(function() {
+                settle(null);
+            }, timeout);
             try {
                 ws = new WebSocket(relay);
                 ws.onopen = function() {
@@ -121,8 +123,12 @@ define(['core/str'], function(Str) {
                         settle(null);
                     }
                 };
-                ws.onerror = function() { settle(null); };
-                ws.onclose = function() { settle(null); };
+                ws.onerror = function() {
+                    settle(null);
+                };
+                ws.onclose = function() {
+                    settle(null);
+                };
             } catch (_) {
                 settle(null);
             }
@@ -166,9 +172,11 @@ define(['core/str'], function(Str) {
         var nonce, signUrl;
         try {
             var challengeResp = await fetch(loginUrl + '?action=challenge');
-            if (!challengeResp.ok) { throw new Error(); }
+            if (!challengeResp.ok) {
+                throw new Error();
+            }
             var challengeData = await challengeResp.json();
-            nonce   = challengeData.nonce;
+            nonce = challengeData.nonce;
             signUrl = challengeData.url;
         } catch (_) {
             setStatus(statusEl, STR.error_challenge, true);
@@ -181,11 +189,11 @@ define(['core/str'], function(Str) {
         try {
             signedEvent = await nostr.signEvent({
                 kind:       27235,
-                created_at: Math.floor(Date.now() / 1000),
+                'created_at': Math.floor(Date.now() / 1000),
                 content:    '',
                 tags: [
-                    ['u',         signUrl],
-                    ['method',    'POST'],
+                    ['u', signUrl],
+                    ['method', 'POST'],
                     ['challenge', nonce]
                 ]
             });
@@ -242,9 +250,13 @@ define(['core/str'], function(Str) {
             ready(function() {
                 // Find the standard Moodle login form.
                 var loginBtn = document.getElementById('loginbtn');
-                if (!loginBtn) { return; }
+                if (!loginBtn) {
+                    return;
+                }
                 var form = loginBtn.closest('form');
-                if (!form) { return; }
+                if (!form) {
+                    return;
+                }
 
                 loadStrings().then(function() {
                     // Build and inject the Nostr login widget after the form.
@@ -287,6 +299,8 @@ define(['core/str'], function(Str) {
                     });
 
                     return STR;
+                }).catch(function() {
+                    // Strings failed to load; leave the Nostr button out.
                 });
             });
         }

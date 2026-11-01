@@ -24,39 +24,34 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname']              = 'Autenticación con Nostr';
-$string['auth_nostrname']          = 'Nostr';
 $string['auth_nostrdescription']   = 'Autentícate usando un par de claves de Nostr mediante una extensión del navegador (NIP-07).';
-
-$string['login_with_nostr']        = 'Iniciar sesión con Nostr';
-$string['provider_name']        = 'Nostr';
-$string['or']                      = 'o';
-$string['status_looking']          = 'Buscando la extensión de Nostr…';
-$string['status_pubkey']           = 'Solicitando la clave pública…';
-$string['status_profile']          = 'Obteniendo tu perfil de Nostr…';
-$string['status_challenge']        = 'Solicitando el desafío de inicio de sesión…';
-$string['status_signing']          = 'Firmando la solicitud de inicio de sesión…';
-$string['status_verifying']        = 'Verificando con el servidor…';
-$string['status_success']          = '¡Sesión iniciada! Redirigiendo…';
-
-$string['error_no_extension']      = 'No se encontró ninguna extensión de Nostr. Instala Alby o nos2x.';
-$string['error_extension_denied']  = 'La extensión denegó el acceso.';
-$string['error_signing_cancelled'] = 'Se canceló la firma.';
-$string['error_challenge']         = 'No se pudo obtener el desafío de inicio de sesión. Recarga la página e inténtalo de nuevo.';
-$string['error_network']           = 'Error de red. Inténtalo de nuevo.';
-$string['error_login_failed']      = 'Error al iniciar sesión. Inténtalo de nuevo.';
-
-$string['relay']                   = 'Relay de Nostr';
-$string['relay_desc']              = 'URL del relay WebSocket usado para obtener los metadatos del perfil de Nostr (kind 0). Se usa solo para rellenar el nombre visible en el primer inicio de sesión.';
+$string['auth_nostrname']          = 'Nostr';
 $string['autocreate']              = 'Crear cuentas automáticamente';
 $string['autocreate_desc']         = 'Crea automáticamente una cuenta de Moodle para cualquier clave pública de Nostr válida en el primer inicio de sesión.';
-$string['showlog']                 = 'Mostrar el registro de progreso del inicio de sesión';
-$string['showlog_desc']            = 'Muestra los mensajes de estado paso a paso (buscando la extensión, firmando, verificando…) bajo el botón de Nostr durante el inicio de sesión. Los mensajes de error se muestran siempre, independientemente de esta opción.';
 $string['challengeratelimit']      = 'Límite de desafíos (por IP y minuto)';
 $string['challengeratelimit_desc'] = 'Número máximo de desafíos de inicio de sesión (GET ?action=challenge) servidos por minuto y por IP del cliente. Cada desafío crea una fila de sesión en Moodle, así que este freno protege contra el crecimiento descontrolado de la tabla de sesiones. Por defecto: 10. Pon 0 para desactivarlo (no recomendado). En instalaciones con varios frontales, asigna la caché auth_nostr/ratelimit a un almacén compartido (Redis, memcached) en Administración del sitio → Plugins → Caché.';
+$string['error_challenge']         = 'No se pudo obtener el desafío de inicio de sesión. Recarga la página e inténtalo de nuevo.';
+$string['error_extension_denied']  = 'La extensión denegó el acceso.';
+$string['error_login_failed']      = 'Error al iniciar sesión. Inténtalo de nuevo.';
+$string['error_network']           = 'Error de red. Inténtalo de nuevo.';
+$string['error_no_extension']      = 'No se encontró ninguna extensión de Nostr. Instala Alby o nos2x.';
+$string['error_signing_cancelled'] = 'Se canceló la firma.';
+$string['gmprequired']             = 'El plugin de autenticación con Nostr (auth_nostr) requiere la extensión PHP GMP para verificar las firmas Schnorr.';
+$string['login_with_nostr']        = 'Iniciar sesión con Nostr';
+$string['or']                      = 'o';
+$string['pluginname']              = 'Autenticación con Nostr';
+$string['privacy:metadata']        = 'El plugin de autenticación con Nostr no almacena ningún dato personal más allá de lo que Moodle guarda en la cuenta de usuario estándar.';
+$string['provider_name']           = 'Nostr';
+$string['relay']                   = 'Relay de Nostr';
+$string['relay_desc']              = 'URL del relay WebSocket usado para obtener los metadatos del perfil de Nostr (kind 0). Se usa solo para rellenar el nombre visible en el primer inicio de sesión.';
+$string['showlog']                 = 'Mostrar el registro de progreso del inicio de sesión';
+$string['showlog_desc']            = 'Muestra los mensajes de estado paso a paso (buscando la extensión, firmando, verificando…) bajo el botón de Nostr durante el inicio de sesión. Los mensajes de error se muestran siempre, independientemente de esta opción.';
+$string['status_challenge']        = 'Solicitando el desafío de inicio de sesión…';
+$string['status_looking']          = 'Buscando la extensión de Nostr…';
+$string['status_profile']          = 'Obteniendo tu perfil de Nostr…';
+$string['status_pubkey']           = 'Solicitando la clave pública…';
+$string['status_signing']          = 'Firmando la solicitud de inicio de sesión…';
+$string['status_success']          = '¡Sesión iniciada! Redirigiendo…';
+$string['status_verifying']        = 'Verificando con el servidor…';
 $string['verifyratelimit']         = 'Límite de verificaciones (por IP y minuto)';
 $string['verifyratelimit_desc']    = 'Número máximo de intentos de inicio de sesión (POST con un evento firmado que llega a la verificación de firma) por minuto y por IP del cliente. Limita el coste de CPU de la verificación Schnorr en el servidor. Por defecto: 20. Pon 0 para desactivarlo (no recomendado).';
-
-$string['privacy:metadata']        = 'El plugin de autenticación con Nostr no almacena ningún dato personal más allá de lo que Moodle guarda en la cuenta de usuario estándar.';
-
-$string['gmprequired']             = 'El plugin de autenticación con Nostr (auth_nostr) requiere la extensión PHP GMP para verificar las firmas Schnorr.';

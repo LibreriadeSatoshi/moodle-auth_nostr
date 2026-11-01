@@ -25,8 +25,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Creates the Nostr identity custom profile field on install.
  */
@@ -58,13 +56,14 @@ function xmldb_auth_nostr_install() {
     $field->shortname    = 'nostrpubkey';
     $field->name         = 'Nostr Identity';
     $field->datatype     = 'text';
-    $field->description  = 'Your Nostr public key (npub1… or hex). Fill this in to link your Moodle account to your Nostr identity.';
+    $field->description  = 'Your Nostr public key (npub1… or hex). ' .
+        'Fill this in to link your Moodle account to your Nostr identity.';
     $field->descriptionformat = FORMAT_HTML;
     $field->categoryid   = $category->id;
     $field->sortorder    = 1;
     $field->required     = 0;
     $field->locked       = 0;
-    $field->visible      = 2; // PROFILE_VISIBLE_ALL
+    $field->visible      = 2; // PROFILE_VISIBLE_ALL.
     $field->forceunique  = 1;
     $field->signup       = 0;
     $field->defaultdata  = '';

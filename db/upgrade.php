@@ -22,10 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * @param int $oldversion the version we are upgrading from.
+ * Execute auth_nostr upgrade from the given old version.
+ *
+ * @param int $oldversion The version we are upgrading from.
  * @return bool
  */
 function xmldb_auth_nostr_upgrade($oldversion) {
