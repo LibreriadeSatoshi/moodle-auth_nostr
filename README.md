@@ -2,7 +2,7 @@
 
 A Moodle authentication plugin that lets users log in using their Nostr keypair via a browser extension (NIP-07). No password required. No email required. Just a Nostr key.
 
-Tested on **Moodle 5.1**. Requires **PHP 8.1+** with the **GMP extension**.
+Tested on **Moodle 5.1 – 5.3** (CI matrix). Requires **PHP 8.2+** with the **GMP extension**.
 
 ---
 
@@ -37,6 +37,7 @@ Browser                                    Moodle (PHP)
   │     { event: signedEvent, metadata }       │
   │───────────────────────────────────────────>│
   │                                            │  Validate:
+  │                                            │  ✓ per-IP rate limit (429)
   │                                            │  ✓ kind == 27235
   │                                            │  ✓ |now - created_at| ≤ 60s
   │                                            │  ✓ challenge matches session
@@ -44,7 +45,7 @@ Browser                                    Moodle (PHP)
   │                                            │  ✓ BIP340 Schnorr signature (GMP)
   │                                            │
   │                                            │  Find or create Moodle user:
-  │                                            │  username = nostr_{hex16}
+  │                                            │  username = full npub
   │                                            │  firstname = kind-0 display_name
   │                                            │
   │  7. { redirect: "/dashboard" }             │
@@ -60,6 +61,10 @@ Browser                                    Moodle (PHP)
 - The challenge nonce is single-use and expires after 120 seconds.
 - The signed event's timestamp must be within 60 seconds of the server clock (replay protection).
 - Signature verification uses a pure PHP BIP340 Schnorr implementation over secp256k1.
+- Per-IP rate limiting on both endpoint actions (HTTP 429), checked before any session row is created.
+- The endpoint returns 404 and issues no challenges while the Nostr auth method is disabled under *Manage authentication*.
+- Request bodies are bounded to 16 KB (HTTP 413).
+- Accounts owned by other auth methods are never adopted, and suspended accounts cannot log in; all rejections use a generic message so the endpoint is not an account-status oracle.
 
 ---
 
@@ -68,7 +73,7 @@ Browser                                    Moodle (PHP)
 | Method | Status | Notes |
 |---|---|---|
 | NIP-07 browser extension | ✅ MVP | Alby, nos2x, Flamingo, Nostore… |
-| NIP-46 remote signer (bunker) | 🔜 Planned | Requires persistent WebSocket |
+| NIP-46 remote signer (bunker) | 🚧 In progress | Branch `eng-84-nip46-bunker-support` |
 | nsec (private key) | 🔜 Planned | Signs in-browser, key never sent |
 
 ---
@@ -78,7 +83,7 @@ Browser                                    Moodle (PHP)
 | Requirement | Version |
 |---|---|
 | Moodle | 5.1+ |
-| PHP | 8.1+ |
+| PHP | 8.2+ |
 | PHP GMP extension | any |
 
 **No Composer, no external dependencies.** The plugin is fully self-contained.
@@ -158,7 +163,7 @@ Auto-creation can be disabled in the plugin settings, allowing only pre-existing
 
 ### Linking a Nostr key to an existing account
 
-The install hook creates a custom profile field **"Nostr Public Key (npub)"** (`nostrpubkey`). Users or admins can fill this field to associate any Moodle account with a Nostr public key. Full account-linking logic is planned for a future release.
+The install hook creates a custom profile field **"Nostr Identity"** (`nostrpubkey`). Users or admins can fill this field to associate any Moodle account with a Nostr public key. Full account-linking logic is planned for a future release.
 
 ---
 
@@ -168,6 +173,7 @@ The install hook creates a custom profile field **"Nostr Public Key (npub)"** (`
 |---|---|---|
 | Relay | `wss://relay.damus.io` | WebSocket relay for fetching kind-0 profile metadata on first login |
 | Auto-create accounts | Enabled | Create a Moodle account for any valid Nostr key |
+| Show login progress log | Enabled | Show step-by-step status messages below the Nostr button (errors always show) |
 | Challenge rate limit | `10` | Max `GET ?action=challenge` per minute and client IP (excess → HTTP 429). `0` disables |
 | Verify rate limit | `20` | Max signed-event verifications per minute and client IP (excess → HTTP 429). `0` disables |
 
@@ -186,21 +192,32 @@ auth/nostr/
 ├── auth.php                      # Auth plugin class — injects login button
 ├── login.php                     # Challenge (GET) + verify (POST) endpoint
 ├── settings.php                  # Admin settings page
+├── styles.css                    # Login button / status styles
+├── SECURITY.md                   # Security policy
 ├── pix/
 │   └── nostr.svg                 # Official Nostr icon (CC0 1.0), shown on the login button
 ├── lang/
-│   └── en/
-│       └── auth_nostr.php        # English strings
+│   ├── en/auth_nostr.php         # English strings
+│   ├── es/auth_nostr.php         # Spanish strings
+│   └── pt_br/auth_nostr.php      # Brazilian Portuguese strings
 ├── classes/
 │   ├── schnorr.php               # BIP340 Schnorr verification (pure PHP/GMP)
 │   ├── nostr_event.php           # Event ID, signature verification, npub encoding
+│   ├── rate_limiter.php          # Fixed-window per-IP rate limiter
 │   └── privacy/
 │       └── provider.php          # Moodle Privacy API
 ├── db/
-│   └── install.php               # Creates "Nostr Identity" profile field
+│   ├── install.php               # Creates "Nostr Identity" profile field
+│   ├── upgrade.php               # Upgrade steps
+│   ├── caches.php                # 'ratelimit' cache definition
+│   └── environment.xml           # GMP extension requirement check
 ├── tests/
 │   ├── test_security.py          # Python security test suite (pytest)
-│   └── requirements.txt          # requests, pytest
+│   ├── requirements.txt          # requests, pytest
+│   └── requirements.lock         # Pinned, hashed test dependencies
+├── .github/workflows/
+│   ├── ci.yml                    # Moodle Plugin CI (phpcs, phpdoc, grunt, phpunit…)
+│   └── security.yml              # Gitleaks, Semgrep, live security tests (manual)
 └── amd/
     ├── src/
     │   └── nostr_login.js        # Source: NIP-07 + NIP-98 client logic
@@ -215,7 +232,7 @@ auth/nostr/
 ### Prerequisites
 
 - Moodle 5.1 development environment
-- PHP 8.1+ with GMP
+- PHP 8.2+ with GMP
 - A Nostr browser extension for manual testing (Alby, nos2x)
 - Node.js + grunt-cli (only if you modify the JavaScript)
 
@@ -238,15 +255,19 @@ $CFG->cachejs        = false;
 
 ### Rebuilding the AMD module
 
-If you modify `amd/src/nostr_login.js`, rebuild the minified file:
+If you modify `amd/src/nostr_login.js`, rebuild the minified file from the
+Moodle root:
 
 ```bash
 cd /path/to/moodle
 npm install
-npx grunt amd --plugin=auth_nostr
+npx grunt amd --root=auth/nostr
 ```
 
-Or manually update `amd/build/nostr_login.min.js` (a single-file define() module).
+The CI grunt step fails if the committed `amd/build/` output does not match a
+fresh `grunt amd` on `MOODLE_501_STABLE` (the lowest supported branch), so
+always build against a clean Moodle 5.1 checkout — never edit the minified
+file by hand.
 
 ### Security tests
 
@@ -256,6 +277,12 @@ No Moodle-specific tooling required — just Python.
 ```bash
 pip install -r tests/requirements.txt
 pytest tests/test_security.py -v
+```
+
+For CI or reproducible environments, use the pinned, hashed lockfile instead:
+
+```bash
+pip install --require-hashes -r tests/requirements.lock
 ```
 
 To run against a non-local instance:
@@ -327,9 +354,12 @@ licensed under the GNU General Public License v3, as required for plugins in the
 Pull requests welcome. Please open an issue first for significant changes.
 
 When submitting a PR:
-- Run `php -l` on all PHP files.
+- The Moodle Plugin CI workflow runs on every push and pull request: phpcs
+  (Moodle standard, zero warnings), phpdoc, eslint, grunt build freshness and
+  phpunit on a PHP 8.3/8.4 × Moodle 5.1/5.2/5.3 matrix. PRs must be green.
 - Test with at least one NIP-07 extension (Alby recommended).
 - If you change `schnorr.php`, add a test vector from the BIP340 spec.
+- If you change `amd/src/`, rebuild `amd/build/` with `grunt amd` (see above).
 
 ---
 
