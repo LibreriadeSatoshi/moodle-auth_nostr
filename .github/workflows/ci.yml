@@ -85,8 +85,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci mustache
 
+      # Grunt only on the lowest supported branch: the amd/build output is
+      # toolchain-specific (MOODLE_501_STABLE terser output differs from
+      # 502/503), so the build-freshness check can only match one branch.
       - name: Grunt
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.moodle-branch == 'MOODLE_501_STABLE' }}
         run: moodle-plugin-ci grunt --max-lint-warnings 0
 
       - name: PHPUnit tests
