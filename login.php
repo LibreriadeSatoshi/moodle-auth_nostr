@@ -47,7 +47,7 @@ header('Content-Type: application/json; charset=utf-8');
 // while disabled, issue no challenges and complete no logins.
 if (!is_enabled_auth('nostr')) {
     http_response_code(404);
-    echo json_encode(['error' => 'Not found']);
+    echo json_encode(['error' => get_string('error_not_found', 'auth_nostr')]);
     exit;
 }
 
@@ -57,7 +57,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'challenge') {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
         http_response_code(405);
-        echo json_encode(['error' => 'Method not allowed']);
+        echo json_encode(['error' => get_string('error_method_not_allowed', 'auth_nostr')]);
         exit;
     }
 
@@ -69,7 +69,7 @@ if ($action === 'challenge') {
     if (!\auth_nostr\rate_limiter::allow('challenge', $challengelimit)) {
         http_response_code(429);
         header('Retry-After: 60');
-        echo json_encode(['error' => 'Too many requests — try again in a minute']);
+        echo json_encode(['error' => get_string('error_rate_limited', 'auth_nostr')]);
         exit;
     }
 
@@ -87,7 +87,7 @@ if ($action === 'challenge') {
 // POST /auth/nostr/login.php.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
+    echo json_encode(['error' => get_string('error_method_not_allowed', 'auth_nostr')]);
     exit;
 }
 
@@ -99,14 +99,14 @@ $maxbody = 16384;
 $contentlength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
 if ($contentlength > $maxbody) {
     http_response_code(413);
-    echo json_encode(['error' => 'Request body too large']);
+    echo json_encode(['error' => get_string('error_body_too_large', 'auth_nostr')]);
     exit;
 }
 
 $rawbody = (string) file_get_contents('php://input', false, null, 0, $maxbody + 1);
 if (strlen($rawbody) > $maxbody) {
     http_response_code(413);
-    echo json_encode(['error' => 'Request body too large']);
+    echo json_encode(['error' => get_string('error_body_too_large', 'auth_nostr')]);
     exit;
 }
 
@@ -114,7 +114,7 @@ $body = json_decode($rawbody, true);
 
 if (!is_array($body) || empty($body['event']) || !is_array($body['event'])) {
     http_response_code(400);
-    echo json_encode(['error' => 'Missing or malformed event in request body']);
+    echo json_encode(['error' => get_string('error_malformed_event', 'auth_nostr')]);
     exit;
 }
 
@@ -124,7 +124,7 @@ $metadata = $body['metadata'] ?? null;
 // Validate session nonce (CSRF / replay protection).
 if (empty($SESSION->auth_nostr_nonce) || empty($SESSION->auth_nostr_nonce_time)) {
     http_response_code(400);
-    echo json_encode(['error' => 'No challenge found — reload the page and try again']);
+    echo json_encode(['error' => get_string('error_no_challenge', 'auth_nostr')]);
     exit;
 }
 
@@ -137,27 +137,27 @@ unset($SESSION->auth_nostr_nonce, $SESSION->auth_nostr_nonce_time);
 
 if ((time() - $noncetime) > 120) {
     http_response_code(400);
-    echo json_encode(['error' => 'Challenge expired — reload the page and try again']);
+    echo json_encode(['error' => get_string('error_challenge_expired', 'auth_nostr')]);
     exit;
 }
 
 // Validate event fields.
 if (!isset($event['kind']) || (int) $event['kind'] !== 27235) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid event kind (expected 27235)']);
+    echo json_encode(['error' => get_string('error_invalid_kind', 'auth_nostr')]);
     exit;
 }
 
 if (!isset($event['created_at']) || abs(time() - (int) $event['created_at']) > 60) {
     http_response_code(400);
-    echo json_encode(['error' => 'Event timestamp is out of the 60-second window']);
+    echo json_encode(['error' => get_string('error_timestamp_window', 'auth_nostr')]);
     exit;
 }
 
 $challengetag = nostr_event::get_tag($event, 'challenge');
 if ($challengetag !== $nonce) {
     http_response_code(400);
-    echo json_encode(['error' => 'Challenge mismatch']);
+    echo json_encode(['error' => get_string('error_challenge_mismatch', 'auth_nostr')]);
     exit;
 }
 
@@ -167,14 +167,14 @@ $urltag = nostr_event::get_tag($event, 'u');
 $expectedurl = (new moodle_url('/auth/nostr/login.php'))->out(false);
 if ($urltag !== $expectedurl) {
     http_response_code(400);
-    echo json_encode(['error' => 'URL tag does not match']);
+    echo json_encode(['error' => get_string('error_url_mismatch', 'auth_nostr')]);
     exit;
 }
 
 $methodtag = nostr_event::get_tag($event, 'method');
 if ($methodtag !== 'POST') {
     http_response_code(400);
-    echo json_encode(['error' => 'Method tag must be POST']);
+    echo json_encode(['error' => get_string('error_method_tag', 'auth_nostr')]);
     exit;
 }
 
@@ -184,21 +184,23 @@ $verifylimit = (int) (get_config('auth_nostr', 'verifyratelimit') ?: 20);
 if (!\auth_nostr\rate_limiter::allow('verify', $verifylimit)) {
     http_response_code(429);
     header('Retry-After: 60');
-    echo json_encode(['error' => 'Too many requests — try again in a minute']);
+    echo json_encode(['error' => get_string('error_rate_limited', 'auth_nostr')]);
     exit;
 }
 
 try {
     $sigvalid = nostr_event::verify($event);
 } catch (\RuntimeException $e) {
+    // The only RuntimeException source in the verification path is the
+    // missing GMP extension; report it with the plugin's own string.
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => get_string('gmprequired', 'auth_nostr')]);
     exit;
 }
 
 if (!$sigvalid) {
     http_response_code(401);
-    echo json_encode(['error' => 'Invalid signature']);
+    echo json_encode(['error' => get_string('error_invalid_signature', 'auth_nostr')]);
     exit;
 }
 
@@ -242,7 +244,7 @@ if (!$user) {
     }
     if (!get_config('auth_nostr', 'autocreate')) {
         http_response_code(403);
-        echo json_encode(['error' => 'Account auto-creation is disabled on this site']);
+        echo json_encode(['error' => get_string('error_autocreate_disabled', 'auth_nostr')]);
         exit;
     }
 
@@ -282,7 +284,7 @@ if (!$user) {
         // generic response here, full detail only in the server-side log.
         debugging('auth_nostr: could not create user account: ' . $e->getMessage(), DEBUG_DEVELOPER);
         http_response_code(500);
-        echo json_encode(['error' => 'Could not create user account. Please try again later.']);
+        echo json_encode(['error' => get_string('error_create_user', 'auth_nostr')]);
         exit;
     }
 
@@ -298,7 +300,7 @@ if (!$user) {
 
 if (!$user) {
     http_response_code(500);
-    echo json_encode(['error' => 'User record could not be loaded']);
+    echo json_encode(['error' => get_string('error_user_load', 'auth_nostr')]);
     exit;
 }
 
