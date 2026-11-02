@@ -87,12 +87,13 @@ class auth_plugin_nostr extends auth_plugin_base {
     public function loginpage_hook() {
         global $PAGE;
 
-        $loginurl = (new moodle_url('/auth/nostr/login.php'))->out(false);
-        $relay    = get_config('auth_nostr', 'relay') ?: 'wss://relay.damus.io';
-        $showlog  = get_config('auth_nostr', 'showlog');
-        $showlog  = ($showlog === false) ? true : (bool) $showlog;
+        $loginurl   = (new moodle_url('/auth/nostr/login.php'))->out(false);
+        $relay      = get_config('auth_nostr', 'relay') ?: 'wss://relay.damus.io';
+        $showlog    = get_config('auth_nostr', 'showlog');
+        $showlog    = ($showlog === false) ? true : (bool) $showlog;
+        $buttontext = trim((string) (get_config('auth_nostr', 'buttontext') ?: ''));
 
-        $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay, $showlog]);
+        $PAGE->requires->js_call_amd('auth_nostr/nostr_login', 'init', [$loginurl, $relay, $showlog, $buttontext]);
     }
 
     /**

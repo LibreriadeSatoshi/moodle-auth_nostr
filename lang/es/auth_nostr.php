@@ -28,6 +28,8 @@ $string['auth_nostrdescription']   = 'Autentícate usando un par de claves de No
 $string['auth_nostrname']          = 'Nostr';
 $string['autocreate']              = 'Crear cuentas automáticamente';
 $string['autocreate_desc']         = 'Crea automáticamente una cuenta de Moodle para cualquier clave pública de Nostr válida en el primer inicio de sesión.';
+$string['buttontext']              = 'Texto del botón de acceso';
+$string['buttontext_desc']         = 'Etiqueta personalizada para el botón de acceso con Nostr. Déjalo vacío para usar el texto por defecto ("Iniciar sesión con Nostr" viene del paquete de idioma, así que sigue el idioma del sitio).';
 $string['challengeratelimit']      = 'Límite de desafíos (por IP y minuto)';
 $string['challengeratelimit_desc'] = 'Número máximo de desafíos de inicio de sesión (GET ?action=challenge) servidos por minuto y por IP del cliente. Cada desafío crea una fila de sesión en Moodle, así que este freno protege contra el crecimiento descontrolado de la tabla de sesiones. Por defecto: 10. Pon 0 para desactivarlo (no recomendado). En instalaciones con varios frontales, asigna la caché auth_nostr/ratelimit a un almacén compartido (Redis, memcached) en Administración del sitio → Plugins → Caché.';
 $string['error_autocreate_disabled'] = 'La creación automática de cuentas está desactivada en este sitio';
@@ -53,6 +55,8 @@ $string['error_timestamp_window']  = 'La marca de tiempo del evento está fuera 
 $string['error_url_mismatch']      = 'La etiqueta URL no coincide';
 $string['error_user_load']         = 'No se pudo cargar el registro del usuario';
 $string['gmprequired']             = 'El plugin de autenticación con Nostr (auth_nostr) requiere la extensión PHP GMP para verificar las firmas Schnorr.';
+$string['logfailures']             = 'Registrar intentos de acceso fallidos';
+$string['logfailures_desc']        = 'Emite el evento user_login_failed de Moodle para los accesos Nostr rechazados (firma no válida, cuenta suspendida, cuenta desconocida). Visible en Administración del sitio → Informes → Registros.';
 $string['login_with_nostr']        = 'Iniciar sesión con Nostr';
 $string['or']                      = 'o';
 $string['pluginname']              = 'Autenticación con Nostr';

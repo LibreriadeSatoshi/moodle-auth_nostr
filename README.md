@@ -73,7 +73,7 @@ Browser                                    Moodle (PHP)
 | Method | Status | Notes |
 |---|---|---|
 | NIP-07 browser extension | ✅ MVP | Alby, nos2x, Flamingo, Nostore… |
-| NIP-46 remote signer (bunker) | 🚧 In progress | Branch `eng-84-nip46-bunker-support` |
+| NIP-46 remote signer (bunker) | 🔜 Planned | Requires persistent WebSocket |
 | nsec (private key) | 🔜 Planned | Signs in-browser, key never sent |
 
 ---
@@ -172,8 +172,10 @@ The install hook creates a custom profile field **"Nostr Identity"** (`nostrpubk
 | Setting | Default | Description |
 |---|---|---|
 | Relay | `wss://relay.damus.io` | WebSocket relay for fetching kind-0 profile metadata on first login |
+| Login button text | Empty (default label) | Custom label for the Nostr login button |
 | Auto-create accounts | Enabled | Create a Moodle account for any valid Nostr key |
 | Show login progress log | Enabled | Show step-by-step status messages below the Nostr button (errors always show) |
+| Log failed login attempts | Enabled | Fire the core `user_login_failed` event for rejected Nostr logins (Reports → Logs) |
 | Challenge rate limit | `10` | Max `GET ?action=challenge` per minute and client IP (excess → HTTP 429). `0` disables |
 | Verify rate limit | `20` | Max signed-event verifications per minute and client IP (excess → HTTP 429). `0` disables |
 
@@ -365,5 +367,6 @@ When submitting a PR:
 
 ## Credits
 
-`pix/nostr.svg` is the official Nostr icon from [mbarulli/nostr-logo](https://github.com/mbarulli/nostr-logo)
-(white on purple version), released under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+`pix/nostr.svg` is the widely used community Nostr logo designed by Andrea Nicolini (Bembureda),
+distributed via [mbarulli/nostr-logo](https://github.com/mbarulli/nostr-logo)
+(white on purple version) and released under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
