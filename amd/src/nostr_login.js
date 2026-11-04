@@ -236,7 +236,7 @@ define(['core/str'], function(Str) {
     };
 
     return {
-        init: function(loginUrl, relay, showlog) {
+        init: function(loginUrl, relay, showlog, buttonText) {
             showLog = (showlog !== false);
 
             var ready = function(fn) {
@@ -281,7 +281,7 @@ define(['core/str'], function(Str) {
                     icon.width = 24;
                     icon.height = 24;
                     btn.appendChild(icon);
-                    btn.appendChild(document.createTextNode(' ' + STR.provider_name));
+                    btn.appendChild(document.createTextNode(' ' + (buttonText || STR.provider_name)));
                     btn.title = STR.login_with_nostr;
 
                     var statusEl = document.createElement('div');

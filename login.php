@@ -31,6 +31,7 @@ define('NO_MOODLE_COOKIES', false);
 require_once('../../config.php');
 require_once($CFG->dirroot . '/login/lib.php');
 require_once($CFG->dirroot . '/user/lib.php');
+require_once($CFG->libdir . '/authlib.php');
 
 use auth_nostr\nostr_event;
 use auth_nostr\schnorr;
@@ -178,6 +179,26 @@ if ($methodtag !== 'POST') {
     exit;
 }
 
+// Best-effort username for the login-failure audit event (never throws on
+// malformed input: the npub is only derived from a valid hex pubkey).
+$audituser = $event['pubkey'] ?? '';
+if (is_string($audituser) && strlen($audituser) === 64 && ctype_xdigit($audituser)) {
+    $audituser = nostr_event::pubkey_to_npub($audituser);
+}
+
+// Fire the core user_login_failed event so rejected logins are auditable
+// under Site administration → Reports → Logs (disable via the logfailures
+// setting).
+$logfailure = function (int $reason) use ($audituser): void {
+    if (!get_config('auth_nostr', 'logfailures')) {
+        return;
+    }
+    \core\event\user_login_failed::create([
+        'context' => context_system::instance(),
+        'other'   => ['username' => $audituser, 'reason' => $reason],
+    ])->trigger();
+};
+
 // Verify cryptographic signature.
 // N-06: per-IP rate limit before paying the Schnorr verification cost.
 $verifylimit = (int) (get_config('auth_nostr', 'verifyratelimit') ?: 20);
@@ -199,6 +220,7 @@ try {
 }
 
 if (!$sigvalid) {
+    $logfailure(AUTH_LOGIN_FAILED);
     http_response_code(401);
     echo json_encode(['error' => get_string('error_invalid_signature', 'auth_nostr')]);
     exit;
@@ -222,6 +244,7 @@ $user = $DB->get_record('user', [
 // N-01: a suspended account must not log in. Use the same generic message as
 // any other rejection below so the endpoint is not an account-status oracle.
 if ($user && $user->suspended) {
+    $logfailure(AUTH_LOGIN_SUSPENDED);
     http_response_code(403);
     echo json_encode(['error' => get_string('error_login_failed', 'auth_nostr')]);
     exit;
@@ -238,11 +261,13 @@ if (!$user) {
         'deleted'    => 0,
     ]);
     if ($collision) {
+        $logfailure(AUTH_LOGIN_NOUSER);
         http_response_code(403);
         echo json_encode(['error' => get_string('error_login_failed', 'auth_nostr')]);
         exit;
     }
     if (!get_config('auth_nostr', 'autocreate')) {
+        $logfailure(AUTH_LOGIN_NOUSER);
         http_response_code(403);
         echo json_encode(['error' => get_string('error_autocreate_disabled', 'auth_nostr')]);
         exit;

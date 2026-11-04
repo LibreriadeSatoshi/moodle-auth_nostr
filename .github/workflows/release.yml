@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  plugin-zip:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Build installable plugin zip
+        # .gitattributes export-ignore leaves dev files (tests, CI) out.
+        run: git archive --format=zip --prefix=nostr/ -o auth_nostr-${{ github.event.release.tag_name }}.zip ${{ github.event.release.tag_name }}
+
+      - name: Attach zip to the release
+        run: gh release upload ${{ github.event.release.tag_name }} auth_nostr-${{ github.event.release.tag_name }}.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

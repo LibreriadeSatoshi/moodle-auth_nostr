@@ -28,6 +28,8 @@ $string['auth_nostrdescription']   = 'Autentique-se com um par de chaves Nostr p
 $string['auth_nostrname']          = 'Nostr';
 $string['autocreate']              = 'Criar contas automaticamente';
 $string['autocreate_desc']         = 'Cria automaticamente uma conta Moodle para qualquer chave pública Nostr válida no primeiro login.';
+$string['buttontext']              = 'Texto do botão de login';
+$string['buttontext_desc']         = 'Rótulo personalizado para o botão de login com Nostr. Deixe vazio para usar o padrão ("Entrar com Nostr" vem do pacote de idiomas, então segue o idioma do site).';
 $string['challengeratelimit']      = 'Limite de desafios (por IP por minuto)';
 $string['challengeratelimit_desc'] = 'Número máximo de desafios de login (GET ?action=challenge) servidos por minuto e por IP do cliente. Cada desafio cria uma linha de sessão no Moodle, então este limite protege contra o crescimento descontrolado da tabela de sessões. Padrão: 10. Use 0 para desativar (não recomendado). Em instalações com vários front-ends, mapeie o cache auth_nostr/ratelimit para um armazenamento compartilhado (Redis, memcached) em Administração do site → Plugins → Cache.';
 $string['error_autocreate_disabled'] = 'A criação automática de contas está desativada neste site';
@@ -53,6 +55,8 @@ $string['error_timestamp_window']  = 'O timestamp do evento está fora da janela
 $string['error_url_mismatch']      = 'A tag URL não corresponde';
 $string['error_user_load']         = 'Não foi possível carregar o registro do usuário';
 $string['gmprequired']             = 'O plugin de autenticação com Nostr (auth_nostr) requer a extensão PHP GMP para verificar as assinaturas Schnorr.';
+$string['logfailures']             = 'Registrar tentativas de login falhas';
+$string['logfailures_desc']        = 'Dispara o evento user_login_failed do Moodle para logins Nostr rejeitados (assinatura inválida, conta suspensa, conta desconhecida). Visível em Administração do site → Relatórios → Logs.';
 $string['login_with_nostr']        = 'Entrar com Nostr';
 $string['or']                      = 'ou';
 $string['pluginname']              = 'Autenticação com Nostr';

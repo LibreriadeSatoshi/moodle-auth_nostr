@@ -33,6 +33,14 @@ if ($ADMIN->fulltree) {
         PARAM_RAW_TRIMMED
     ));
 
+    $settings->add(new admin_setting_configtext(
+        'auth_nostr/buttontext',
+        get_string('buttontext', 'auth_nostr'),
+        get_string('buttontext_desc', 'auth_nostr'),
+        '',
+        PARAM_TEXT
+    ));
+
     $settings->add(new admin_setting_configcheckbox(
         'auth_nostr/autocreate',
         get_string('autocreate', 'auth_nostr'),
@@ -44,6 +52,13 @@ if ($ADMIN->fulltree) {
         'auth_nostr/showlog',
         get_string('showlog', 'auth_nostr'),
         get_string('showlog_desc', 'auth_nostr'),
+        1
+    ));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'auth_nostr/logfailures',
+        get_string('logfailures', 'auth_nostr'),
+        get_string('logfailures_desc', 'auth_nostr'),
         1
     ));
 

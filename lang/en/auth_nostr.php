@@ -28,6 +28,8 @@ $string['auth_nostrdescription']   = 'Authenticate using a Nostr keypair via a b
 $string['auth_nostrname']          = 'Nostr';
 $string['autocreate']              = 'Auto-create accounts';
 $string['autocreate_desc']         = 'Automatically create a Moodle account for any valid Nostr public key on first login.';
+$string['buttontext']              = 'Login button text';
+$string['buttontext_desc']         = 'Custom label for the Nostr login button. Leave empty to use the default ("Log in with Nostr" comes from the language pack, so it follows the site language).';
 $string['challengeratelimit']      = 'Challenge rate limit (per IP per minute)';
 $string['challengeratelimit_desc'] = 'Maximum number of login challenges (GET ?action=challenge) served per minute and client IP. Each challenge creates a Moodle session row, so this brake protects against unauthenticated session-table bloat. Default: 10. Set to 0 to disable (not recommended). On multi-node setups, map the auth_nostr/ratelimit cache to a shared store (Redis, memcached) under Site administration → Plugins → Caching.';
 $string['error_autocreate_disabled'] = 'Account auto-creation is disabled on this site';
@@ -53,6 +55,8 @@ $string['error_timestamp_window']  = 'Event timestamp is out of the 60-second wi
 $string['error_url_mismatch']      = 'URL tag does not match';
 $string['error_user_load']         = 'User record could not be loaded';
 $string['gmprequired']             = 'The GMP PHP extension is required by the Nostr authentication plugin (auth_nostr) to verify Schnorr signatures.';
+$string['logfailures']             = 'Log failed login attempts';
+$string['logfailures_desc']        = 'Fire the core user_login_failed event for rejected Nostr logins (invalid signature, suspended account, unknown account). Visible under Site administration → Reports → Logs.';
 $string['login_with_nostr']        = 'Log in with Nostr';
 $string['or']                      = 'or';
 $string['pluginname']              = 'Nostr authentication';
