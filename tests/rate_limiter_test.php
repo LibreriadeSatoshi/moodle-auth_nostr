@@ -25,6 +25,8 @@
 
 namespace auth_nostr;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 /**
  * Unit tests for {@see rate_limiter}.
  *
@@ -32,6 +34,7 @@ namespace auth_nostr;
  * @copyright  2026 Librería de Satoshi
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(rate_limiter::class)]
 final class rate_limiter_test extends \advanced_testcase {
     /**
      * Set a fixed client IP for the limiter's getremoteaddr() lookup.

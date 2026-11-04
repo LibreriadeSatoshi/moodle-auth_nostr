@@ -25,6 +25,7 @@
 
 namespace auth_nostr;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
@@ -34,6 +35,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * @copyright  2026 Librería de Satoshi
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(schnorr::class)]
 final class schnorr_test extends \basic_testcase {
     /**
      * Official BIP340 test vectors (indices 0-14, the ones with a 32-byte

@@ -25,6 +25,8 @@
 
 namespace auth_nostr;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 /**
  * Unit tests for {@see nostr_event}.
  *
@@ -32,6 +34,7 @@ namespace auth_nostr;
  * @copyright  2026 Librería de Satoshi
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(nostr_event::class)]
 final class nostr_event_test extends \basic_testcase {
     /**
      * Hex pubkey → npub conversion matches the NIP-19 reference example.

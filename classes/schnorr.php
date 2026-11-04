@@ -204,6 +204,12 @@ class schnorr {
             return false;
         }
 
+        // Validate hex before decoding so malformed input fails cleanly
+        // instead of raising hex2bin() warnings.
+        if (!ctype_xdigit($pubkeyhex) || !ctype_xdigit($msghex) || !ctype_xdigit($sighex)) {
+            return false;
+        }
+
         $pubkeybytes = hex2bin($pubkeyhex);
         $msgbytes    = hex2bin($msghex);
         $sigbytes    = hex2bin($sighex);
